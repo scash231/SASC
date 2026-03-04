@@ -1,0 +1,43 @@
+# Build output
+bin/
+obj/
+out/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# .NET
+*.dll
+*.exe
+*.pdb
+*.cache
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Publish output
+publish/
+
+# App data files (user-specific, not for source control)
+accounts.json
+settings.json
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# NuGet
+packages/
+*.nupkg
+.nuget/

@@ -1,0 +1,136 @@
+<Window x:Class="SASC.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings — SAS"
+        Height="460" Width="500"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="#0a0a0f">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Settings"
+                   Foreground="#aaaacc" FontFamily="Segoe UI"
+                   FontSize="14" FontWeight="SemiBold" Margin="0 0 0 12"/>
+
+        <TabControl Grid.Row="1" Background="#0a0a0f" BorderBrush="#1a1a2e">
+
+            <!-- General -->
+            <TabItem Header="General" Foreground="#888" Background="#0f0f1a">
+                <StackPanel Margin="14">
+
+                    <TextBlock Text="When X is pressed"
+                               Foreground="#555" FontFamily="Segoe UI"
+                               FontSize="10" FontWeight="Bold"
+                               Margin="0 12 0 6"/>
+                    <RadioButton x:Name="RbTray"
+                                 Content="Hide to system tray  (keep running in background)"
+                                 Foreground="#aaa" FontFamily="Segoe UI" FontSize="11"
+                                 Margin="0 0 0 4"/>
+                    <RadioButton x:Name="RbExit"
+                                 Content="Exit completely  (close the application)"
+                                 Foreground="#aaa" FontFamily="Segoe UI" FontSize="11"
+                                 Margin="0 0 0 16"/>
+
+                    <TextBlock Text="After switching account"
+                               Foreground="#555" FontFamily="Segoe UI"
+                               FontSize="10" FontWeight="Bold"
+                               Margin="0 0 0 6"/>
+                    <CheckBox x:Name="ChkMinimize"
+                              Content="Minimize SAS"
+                              Foreground="#aaa" FontFamily="Segoe UI"
+                              Margin="0 0 0 6"/>
+                    <CheckBox x:Name="ChkAutoStart"
+                              Content="Start SAS with Windows"
+                              Foreground="#aaa" FontFamily="Segoe UI"
+                              Margin="0 14 0 0"/>
+
+                    <TextBlock Text="Kill wait (seconds)"
+                               Foreground="#555" FontFamily="Segoe UI"
+                               FontSize="10" FontWeight="Bold"
+                               Margin="0 14 0 4"/>
+                    <TextBox x:Name="TxtKillWait" Width="60" Height="26"
+                             HorizontalAlignment="Left"
+                             Background="#0f0f1a" Foreground="White"
+                             BorderBrush="#1e1e2e"/>
+                    <TextBlock Text="Seconds to wait after Steam closes before relaunching."
+                               Foreground="#2a2a3a" FontFamily="Segoe UI"
+                               FontSize="10" Margin="0 3 0 0"/>
+                </StackPanel>
+            </TabItem>
+
+            <!-- Steam -->
+            <TabItem Header="Steam" Foreground="#888" Background="#0f0f1a">
+                <StackPanel Margin="14">
+                    <TextBlock Text="Steam install path"
+                               Foreground="#555" FontFamily="Segoe UI"
+                               FontSize="10" FontWeight="Bold" Margin="0 12 0 4"/>
+                    <TextBox x:Name="TxtSteamPath" Height="26"
+                             Background="#0f0f1a" Foreground="White"
+                             BorderBrush="#1e1e2e"/>
+                    <TextBlock Text="Extra launch arguments"
+                               Foreground="#555" FontFamily="Segoe UI"
+                               FontSize="10" FontWeight="Bold" Margin="0 14 0 4"/>
+                    <TextBox x:Name="TxtLaunchArgs" Height="26"
+                             Background="#0f0f1a" Foreground="White"
+                             BorderBrush="#1e1e2e"/>
+                    <TextBlock Text="e.g.  -silent  -noverifyfiles"
+                               Foreground="#2a2a3a" FontFamily="Segoe UI"
+                               FontSize="10" Margin="0 4 0 0"/>
+                </StackPanel>
+            </TabItem>
+
+            <!-- Auto Login -->
+            <TabItem Header="Auto Login" Foreground="#888" Background="#0f0f1a">
+                <StackPanel Margin="14">
+                    <TextBlock Text="Switch to this account automatically when SAS starts."
+                               Foreground="#444" FontFamily="Segoe UI" FontSize="11"
+                               Margin="0 14 0 12" TextWrapping="Wrap"/>
+                    <ComboBox x:Name="CmbAutoLogin" Height="26" Width="240"
+                              HorizontalAlignment="Left"
+                              Background="#0f0f1a" Foreground="#aaa"
+                              BorderBrush="#1e1e2e" FontFamily="Segoe UI" FontSize="11"/>
+                </StackPanel>
+            </TabItem>
+
+            <!-- About -->
+            <TabItem Header="About" Foreground="#888" Background="#0f0f1a">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="SAS" Foreground="#5865f2"
+                               FontFamily="Segoe UI" FontSize="32"
+                               FontWeight="Bold" HorizontalAlignment="Center"
+                               Margin="0 28 0 4"/>
+                    <TextBlock Text="Steam Account Switcher"
+                               Foreground="#333" FontFamily="Segoe UI" FontSize="11"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="TxtVersion"
+                               Foreground="#252535" FontFamily="Segoe UI" FontSize="10"
+                               HorizontalAlignment="Center" Margin="0 6 0 0"/>
+                    <TextBlock Text="Built with C# and WPF&#x0a;No data is ever sent anywhere."
+                               Foreground="#1e1e2e" FontFamily="Segoe UI" FontSize="10"
+                               HorizontalAlignment="Center" TextAlignment="Center"
+                               Margin="0 14 0 0"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal"
+                    HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Button Content="cancel" Width="90" Height="28"
+                    Background="#0f0f1a" Foreground="#444"
+                    FontFamily="Segoe UI" FontSize="11"
+                    BorderThickness="0" Margin="0 0 8 0"
+                    Click="BtnCancel_Click"/>
+            <Button Content="save" Width="90" Height="28"
+                    Background="#5865f2" Foreground="White"
+                    FontFamily="Segoe UI" FontSize="11"
+                    BorderThickness="0"
+                    Click="BtnSave_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
