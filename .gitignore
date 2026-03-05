@@ -3,6 +3,9 @@ bin/
 obj/
 out/
 
+#Image Cache
+avatarcache/
+
 # Visual Studio
 .vs/
 *.user
