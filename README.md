@@ -1,4 +1,4 @@
-###scash´s account switcher
+# scash´s account switcher
 
 * Usefull for all lazy fucks like me who have to many accounts.
 
