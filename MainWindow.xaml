@@ -145,7 +145,7 @@
         <Border Grid.Row="0" Background="#07070f">
             <Grid Margin="14 0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Scash" Foreground="#5865f2"
+                    <TextBlock Text="scash´s" Foreground="#5865f2"
                                FontFamily="Segoe UI" FontSize="14"
                                FontWeight="Bold" Margin="0 0 8 0"/>
                     <TextBlock Text="Account Switcher"
