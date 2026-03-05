@@ -6,7 +6,7 @@ namespace SASC.Models
         public string PersonaName     { get; set; } = "";
         public string SteamId         { get; set; } = "";
         public bool   IsRecent        { get; set; } = false;
-        public bool   RememberPassword{ get; set; } = false;
+        public bool   RememberPassword{ get; set; } = true;
         public bool   IsManual        { get; set; } = false;
         public string Password        { get; set; } = "";
         public string Note            { get; set; } = "";
