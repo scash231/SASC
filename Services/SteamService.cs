@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,115 +12,107 @@ namespace SASC.Services
     public class SteamService
     {
         private readonly string _steamPath;
-        private readonly string _steamExe;
-        private readonly string _vdfPath;
+        private string VdfPath => Path.Combine(_steamPath, "config", "loginusers.vdf");
+        private string SteamExe => Path.Combine(_steamPath, "steam.exe");
 
         public SteamService(string steamPath)
         {
             _steamPath = steamPath;
-            _steamExe  = Path.Combine(steamPath, "steam.exe");
-            _vdfPath   = Path.Combine(steamPath, "config", "loginusers.vdf");
         }
 
         public List<SteamAccount> ParseAccounts()
         {
             var accounts = new List<SteamAccount>();
-            if (!File.Exists(_vdfPath)) return accounts;
+            if (!File.Exists(VdfPath)) return accounts;
 
-            string content = File.ReadAllText(_vdfPath);
-            var blocks = Regex.Matches(content,
-                @"""(\d{17})""\s*\{([^}]*)\}", RegexOptions.Singleline);
-
-            foreach (Match block in blocks)
+            try
             {
-                string steamId = block.Groups[1].Value;
-                string body    = block.Groups[2].Value;
-                string name    = GetVal(body, "AccountName");
-                if (string.IsNullOrEmpty(name)) continue;
+                var text    = File.ReadAllText(VdfPath);
+                var pattern = @"""(\d{17})""\s*\{([^}]*)\}";
+                var matches = Regex.Matches(text, pattern, RegexOptions.Singleline);
 
-                accounts.Add(new SteamAccount
+                foreach (Match m in matches)
                 {
-                    Username         = name,
-                    PersonaName      = GetVal(body, "PersonaName") is { Length: > 0 } p ? p : name,
-                    SteamId          = steamId,
-                    RememberPassword = GetVal(body, "RememberPassword") == "1",
-                    IsRecent         = GetVal(body, "MostRecent") == "1",
-                    IsManual         = false
-                });
+                    var steamId = m.Groups[1].Value;
+                    var block   = m.Groups[2].Value;
+
+                    var acc = new SteamAccount
+                    {
+                        SteamId     = steamId,
+                        Username    = ExtractVdfValue(block, "AccountName"),
+                        PersonaName = ExtractVdfValue(block, "PersonaName"),
+                        IsRecent    = ExtractVdfValue(block, "MostRecent") == "1"
+                    };
+
+                    if (!string.IsNullOrEmpty(acc.Username))
+                        accounts.Add(acc);
+                }
             }
+            catch { }
+
             return accounts;
         }
 
-        private static string GetVal(string block, string key)
+        private static string ExtractVdfValue(string block, string key)
         {
-            var m = Regex.Match(block, $@"""{key}""\s+""([^""]*)""");
-            return m.Success ? m.Groups[1].Value : "";
+            var match = Regex.Match(block, $@"""{key}""\s+""([^""]*)""");
+            return match.Success ? match.Groups[1].Value : "";
         }
 
-        public void PatchVdf(string targetUsername)
+        public void PatchVdf(string username)
         {
-            if (!File.Exists(_vdfPath)) return;
-            var lines  = File.ReadAllLines(_vdfPath);
-            var result = new List<string>();
-            bool inside = false;
-
-            foreach (var line in lines)
+            if (!File.Exists(VdfPath)) return;
+            try
             {
-                var edited = line;
-                var nm = Regex.Match(line, @"""AccountName""\s+""([^""]+)""");
-                if (nm.Success)
-                    inside = nm.Groups[1].Value.Equals(
-                        targetUsername, System.StringComparison.OrdinalIgnoreCase);
-
-                if (Regex.IsMatch(line, @"""MostRecent"""))
-                    edited = Regex.Replace(line,
-                        @"""MostRecent""\s+""[01]""",
-                        $"\"MostRecent\"\t\t\"{(inside ? "1" : "0")}\"");
-
-                if (inside && Regex.IsMatch(line, @"""RememberPassword"""))
-                    edited = Regex.Replace(line,
-                        @"""RememberPassword""\s+""[01]""",
-                        "\"RememberPassword\"\t\t\"1\"");
-
-                if (Regex.IsMatch(line, @"^\s*\}\s*$")) inside = false;
-                result.Add(edited);
+                var text    = File.ReadAllText(VdfPath);
+                // Set all MostRecent to 0
+                text = Regex.Replace(text, @"""MostRecent""\s+""1""", @"""MostRecent""		""0""");
+                // Find the block for this username and set MostRecent to 1
+                var pattern = $@"(""AccountName""\s+(""{username}"".*?))""MostRecent""\s+""0""";
+                text = Regex.Replace(text, pattern,
+                    m => m.Value.Replace(@"""MostRecent""		""0""", @"""MostRecent""		""1"""),
+                    RegexOptions.Singleline);
+                File.WriteAllText(VdfPath, text);
             }
-            File.WriteAllLines(_vdfPath, result);
+            catch { }
         }
 
         public void SetRegistry(string username)
         {
-            using var key = Registry.CurrentUser.OpenSubKey(
-                @"Software\Valve\Steam", writable: true);
-            key?.SetValue("AutoLoginUser",    username);
-            key?.SetValue("RememberPassword", 1, RegistryValueKind.DWord);
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(
+                    @"Software\Valve\Steam", writable: true);
+                key?.SetValue("AutoLoginUser",    username);
+                key?.SetValue("RememberPassword", 1, RegistryValueKind.DWord);
+            }
+            catch { }
         }
 
         public async Task KillSteamAsync(int waitSeconds)
         {
-            foreach (var p in Process.GetProcessesByName("steam"))
+            foreach (var proc in Process.GetProcessesByName("steam"))
             {
-                p.Kill();
-                await p.WaitForExitAsync();
+                try { proc.Kill(); } catch { }
             }
             await Task.Delay(waitSeconds * 1000);
         }
 
-        public void LaunchSteam(string? args = null)
+        public void LaunchSteam(string extraArgs = "")
         {
-            var info = new ProcessStartInfo(_steamExe);
-            if (!string.IsNullOrEmpty(args)) info.Arguments = args;
-            Process.Start(info);
+            if (!File.Exists(SteamExe)) return;
+            var args = string.IsNullOrWhiteSpace(extraArgs) ? "" : extraArgs;
+            Process.Start(new ProcessStartInfo(SteamExe, args)
+                { UseShellExecute = true });
         }
 
-        public void LaunchSteamWithLogin(string user, string pass, string? extra = null)
+        public void LaunchSteamWithLogin(string username, string password, string extraArgs = "")
         {
-            string args = $"-login {user} {pass}";
-            if (!string.IsNullOrEmpty(extra)) args += " " + extra;
-            Process.Start(new ProcessStartInfo(_steamExe) { Arguments = args });
+            if (!File.Exists(SteamExe)) return;
+            var args = $"-login {username} {password}";
+            if (!string.IsNullOrWhiteSpace(extraArgs)) args += $" {extraArgs}";
+            Process.Start(new ProcessStartInfo(SteamExe, args)
+                { UseShellExecute = true });
         }
-
-        public bool SteamExeExists() => File.Exists(_steamExe);
-        public bool VdfExists()      => File.Exists(_vdfPath);
     }
 }

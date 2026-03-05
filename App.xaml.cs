@@ -1,17 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Threading;
 using Hardcodet.Wpf.TaskbarNotification;
 using SASC.Models;
-using SASC.Views;
 
 namespace SASC
 {
     public partial class App : Application
     {
-        public const string Version = "0.1-beta";
+        public const string Version = "1.2.0";
         public static TaskbarIcon? TrayIcon { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
@@ -20,7 +19,7 @@ namespace SASC
 
             DispatcherUnhandledException += (s, ex) =>
             {
-                MessageBox.Show(ex.Exception.ToString(), "SASC Crash",
+                MessageBox.Show(ex.Exception.ToString(), "SAS Crash",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 ex.Handled = true;
             };
@@ -29,9 +28,7 @@ namespace SASC
             TrayIcon.TrayMouseDoubleClick += (_, _) => ShowMainWindow();
             TrayIcon.TrayLeftMouseUp      += (_, _) => ShowMainWindow();
 
-            // Build initial context menu
             RefreshTrayMenu();
-
             ShowMainWindow();
         }
 
@@ -47,7 +44,6 @@ namespace SASC
             win.Activate();
         }
 
-        // Called by MainWindow after every LoadAll() so menu stays in sync
         public static void RefreshTrayMenu()
         {
             if (TrayIcon == null) return;
@@ -58,25 +54,21 @@ namespace SASC
 
             var menu = new ContextMenu();
 
-            // ── Quick switch accounts ──
             if (accounts.Count > 0)
             {
-                var header = new MenuItem
+                menu.Items.Add(new MenuItem
                 {
-                    Header      = "Quick Switch",
-                    IsEnabled   = false,
-                    FontSize    = 11,
-                    Foreground  = System.Windows.Media.Brushes.Gray
-                };
-                menu.Items.Add(header);
+                    Header    = "Quick Switch",
+                    IsEnabled = false,
+                    FontSize  = 11,
+                    Foreground = System.Windows.Media.Brushes.Gray
+                });
 
                 foreach (var acc in accounts)
                 {
                     var item = new MenuItem
                     {
-                        Header = acc.IsRecent
-                            ? $"● {acc.DisplayName}"
-                            : $"○ {acc.DisplayName}"
+                        Header = acc.IsRecent ? $"● {acc.DisplayName}" : $"○ {acc.DisplayName}"
                     };
                     var username = acc.Username;
                     item.Click += async (_, _) =>
@@ -86,25 +78,17 @@ namespace SASC
                     };
                     menu.Items.Add(item);
                 }
-
                 menu.Items.Add(new Separator());
             }
 
-            // ── Open / Exit ──
             var open = new MenuItem { Header = "Open SAS" };
             open.Click += (_, _) => ShowMainWindow();
-
             var exit = new MenuItem { Header = "Exit" };
-            exit.Click += (_, _) =>
-            {
-                TrayIcon?.Dispose();
-                Current.Shutdown();
-            };
+            exit.Click += (_, _) => { TrayIcon?.Dispose(); Current.Shutdown(); };
 
             menu.Items.Add(open);
             menu.Items.Add(new Separator());
             menu.Items.Add(exit);
-
             TrayIcon.ContextMenu = menu;
         }
 
