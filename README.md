@@ -1,3 +1,5 @@
+###scash´s account switcher
+
 * Usefull for all lazy fucks like me who have to many accounts.
 
 * Maybe ill also implement a Epic games, Origin, Discord or EA APP etc. switcher
