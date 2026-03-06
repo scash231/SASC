@@ -6,10 +6,10 @@ using System.Windows.Interop;
 
 namespace SASC.Views
 {
-    public partial class AccountDialog : Window
+    public partial class DiscordAccountDialog : Window
     {
         public string ResultUsername { get; private set; } = "";
-        public string ResultPassword { get; private set; } = "";
+        public string ResultToken    { get; private set; } = "";
         public string ResultNote     { get; private set; } = "";
 
         [DllImport("dwmapi.dll")]
@@ -24,11 +24,11 @@ namespace SASC.Views
             DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref dark, sizeof(int));
         }
 
-        public AccountDialog(string username = "", string password = "", string note = "")
+        public DiscordAccountDialog(string username = "", string token = "", string note = "")
         {
             InitializeComponent();
             TxtUsername.Text = username;
-            TxtPassword.Text = password;
+            TxtToken.Text    = token;
             TxtNote.Text     = note;
         }
 
@@ -41,8 +41,13 @@ namespace SASC.Views
                 TxtUsername.BorderBrush = System.Windows.Media.Brushes.Red;
                 return;
             }
+            if (string.IsNullOrWhiteSpace(TxtToken.Text))
+            {
+                TxtToken.BorderBrush = System.Windows.Media.Brushes.Red;
+                return;
+            }
             ResultUsername = TxtUsername.Text.Trim();
-            ResultPassword = TxtPassword.Text.Trim();
+            ResultToken    = TxtToken.Text.Trim();
             ResultNote     = TxtNote.Text.Trim();
             DialogResult   = true;
         }

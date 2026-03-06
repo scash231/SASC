@@ -10,7 +10,7 @@ namespace SASC
 {
     public partial class App : Application
     {
-        public const string Version = "1.2.0";
+        public const string Version = "1.3.0";
         public static TaskbarIcon? TrayIcon { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)

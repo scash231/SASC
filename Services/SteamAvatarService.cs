@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +10,10 @@ namespace SASC.Services
 {
     public class SteamAvatarService
     {
-        private const string CacheDir = "avatarcache";
+        private static readonly string CacheDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "account manager", "avatarcache");
+
         private static readonly HttpClient Http = new();
 
         public SteamAvatarService()
@@ -38,7 +42,7 @@ namespace SASC.Services
             {
                 var xml = await Http.GetStringAsync(
                     $"https://steamcommunity.com/profiles/{steamId}/?xml=1");
-                var doc       = XDocument.Parse(xml);
+                var doc = XDocument.Parse(xml);
                 var avatarUrl = doc.Root?.Element("avatarMedium")?.Value;
                 if (string.IsNullOrEmpty(avatarUrl)) return;
                 var bytes = await Http.GetByteArrayAsync(avatarUrl);

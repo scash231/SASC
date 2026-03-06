@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media.Animation;
 using SASC.Models;
 using SASC.Services;
 
@@ -13,7 +16,8 @@ namespace SASC.Views
         public AppSettings ResultSettings { get; private set; }
         public bool        ShouldExit     { get; private set; } = false;
 
-        private readonly AccountService _accountService = new();
+        private readonly AccountService _accountService  = new();
+        private bool                    _tabInitialized  = false;
 
         [DllImport("dwmapi.dll")]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
@@ -49,6 +53,27 @@ namespace SASC.Views
                 ? "(disabled)" : settings.AutoLogin;
         }
 
+        // ── Tab transition animation ──────────────────────────────────────────
+
+        private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_tabInitialized) { _tabInitialized = true; return; }
+
+            var dur  = new Duration(TimeSpan.FromMilliseconds(220));
+            var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+
+            var anim = new DoubleAnimationUsingKeyFrames();
+            anim.KeyFrames.Add(new EasingDoubleKeyFrame(0.55,
+                KeyTime.FromTimeSpan(TimeSpan.Zero)));
+            anim.KeyFrames.Add(new EasingDoubleKeyFrame(0,
+                KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(220)))
+                { EasingFunction = ease });
+
+            TabTransitionOverlay.BeginAnimation(OpacityProperty, anim);
+        }
+
+        // ── Build & save ──────────────────────────────────────────────────────
+
         private AppSettings BuildSettings()
         {
             _accountService.SetAutoStart(ChkAutoStart.IsChecked == true);
@@ -72,13 +97,16 @@ namespace SASC.Views
             DialogResult   = true;
         }
 
-        private void BtnSaveExit_Click(object sender, RoutedEventArgs e)
+
+        private void Btnforcequit_Click(object sender, RoutedEventArgs e)
         {
-            ResultSettings = BuildSettings();
-            DialogResult   = true;
+            ShouldExit = true;
+            DialogResult = true;
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e) =>
             DialogResult = false;
+
+        private void TitleBar_MouseLeftButtonDown(object s, MouseButtonEventArgs e) => DragMove();
     }
 }
