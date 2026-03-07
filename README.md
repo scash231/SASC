@@ -1,4 +1,4 @@
-# scash´s account switcher
+#  Multi Account Manager
 
 * Usefull for all lazy fucks like me who have to many accounts.
 
